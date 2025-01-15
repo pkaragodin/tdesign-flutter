@@ -168,17 +168,21 @@ class TDCheckboxGroupState extends State<TDCheckboxGroup> {
     checkIds?.forEach((element) {
       checkBoxStates[element] = true;
     });
+    // checkBoxStates['watsapp'] = false;
   }
 
 
   @override
   void didUpdateWidget(TDCheckboxGroup oldWidget) {
     super.didUpdateWidget(oldWidget);
+    print('did update ${oldWidget.checkedIds} ${widget.checkedIds}');
+    print('${checkBoxStates}');
     final oldCheckIds = oldWidget.checkedIds;
     final newCheckIds = widget.checkedIds;
     if (oldCheckIds != newCheckIds) {
       _syncCheckState(newCheckIds);
     }
+    print('${checkBoxStates}');
   }
 
 
@@ -187,9 +191,11 @@ class TDCheckboxGroupState extends State<TDCheckboxGroup> {
   ///
   ///
   bool getCheckBoxStateById(String id, bool checked) {
+    print('checkbox states ${checkBoxStates} ${id} ${checked}');
     if (checkBoxStates[id] == null) {
+      // replace check to false, because when using with TDRadioGroup has bug with inconsistent state
       // checkBox本身的状态
-      checkBoxStates[id] = checked;
+      checkBoxStates[id] = false; // checked
     }
     return checkBoxStates[id]!;
   }

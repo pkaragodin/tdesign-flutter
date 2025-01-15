@@ -119,6 +119,15 @@ class _TDUploadState extends State<TDUpload> {
     fileList = widget.files;
   }
 
+  @override
+  void didUpdateWidget(TDUpload oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.files != oldWidget.files) {
+      fileList = widget.files;
+    }
+  }
+
+
   // 获取相册照片或视频
   Future<List<XFile>> getMediaFromPicker() async {
     if (!canUpload || widget.mediaType.isEmpty) {

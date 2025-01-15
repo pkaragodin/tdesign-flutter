@@ -153,7 +153,7 @@ class TDDefaultTheme {
             },
             "fontBodySmall": {
                 "size": 12,
-                "lineHeight": 20
+                "lineHeight": 14
             },
             "fontBodyExtraSmall": {
                 "size": 10,

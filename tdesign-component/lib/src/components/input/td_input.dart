@@ -33,7 +33,7 @@ class TDInput extends StatelessWidget {
       this.inputFormatters,
       this.inputDecoration,
       this.maxLines = 1,
-      this.focusNode,
+      FocusNode? focusNode,
       this.controller,
       this.cursorColor,
       this.rightBtn,
@@ -61,7 +61,9 @@ class TDInput extends StatelessWidget {
       this.inputAction,
       TDInputSpacer? spacer,
       this.cardStyleBottomText,
-      this.onTapOutside})
+      this.onTapOutside,
+      this.errorText
+      })
       :
         // assert(() {
         //   if (type == TDInputType.cardStyle) {
@@ -77,6 +79,8 @@ class TDInput extends StatelessWidget {
         // inputView与rightBtn 17.5
         // 最右侧间距16
         spacer = spacer ?? TDInputSpacer.generateDefault(),
+
+        focusNode = focusNode ?? FocusNode(),
         // 输入框左侧内容宽度（不包括最左侧的16dp padding）
         // leftLabel：左侧'标签文字'，一个字宽度16，最多一行展示5个字(5个字时，多一点荣誉)
         // leftIcon: 左侧icon，限制大小为24，再加上4dp的间距，即28
@@ -241,13 +245,15 @@ class TDInput extends StatelessWidget {
   /// 点击输入框外部区域回调
   final TapRegionCallback? onTapOutside;
 
+  final String? errorText;
+
   /// 获取输入框规格
-  double getInputPadding() {
+  double getInputPadding(BuildContext context) {
     switch (size) {
       case TDInputSize.small:
-        return 12;
+        return TDTheme.of(context).spacer8;
       case TDInputSize.large:
-        return 16;
+        return TDTheme.of(context).spacer12;
     }
   }
 
@@ -324,8 +330,8 @@ class TDInput extends StatelessWidget {
                         constraints: BoxConstraints(maxWidth: _leftLabelWidth),
                         padding: EdgeInsets.only(
                             left: leftIcon != null ? (spacer.iconLabelSpace ?? 4) : 0,
-                            top: getInputPadding(),
-                            bottom: getInputPadding()),
+                            top: getInputPadding(context),
+                            bottom: getInputPadding(context)),
                         child: TDText(
                           leftLabel,
                           maxLines: 2,
@@ -385,14 +391,14 @@ class TDInput extends StatelessWidget {
                           EdgeInsets.only(
                               left: spacer.labelInputSpace ?? 16,
                               right: spacer.inputRightSpace != null ? spacer.inputRightSpace! / 2 : 16,
-                              bottom: additionInfo != '' ? 4 : getInputPadding(),
-                              top: getInputPadding()),
+                              bottom: additionInfo != '' ? 4 : getInputPadding(context),
+                              top: getInputPadding(context)),
                       inputAction: inputAction,
                     ),
                     Visibility(
                       child: Container(
                         width: double.infinity,
-                        padding: EdgeInsets.only(left: spacer.additionInfoSpace ?? 16,right:TextAlign.end==contentAlignment?8:0, bottom: getInputPadding()),
+                        padding: EdgeInsets.only(left: spacer.additionInfoSpace ?? 16,right:TextAlign.end==contentAlignment?8:0, bottom: getInputPadding(context)),
                         child: TDText(
                           additionInfo,
                           font: TDTheme.of(context).fontBodySmall,
@@ -408,7 +414,7 @@ class TDInput extends StatelessWidget {
               Visibility(
                 visible: rightWidget != null,
                 child: Container(
-                  margin: EdgeInsets.only(top: getInputPadding(), bottom: getInputPadding(), right: 16),
+                  margin: EdgeInsets.only(top: getInputPadding(context), bottom: getInputPadding(context), right: 16),
                   child: rightWidget,
                 ),
               ),
@@ -419,7 +425,7 @@ class TDInput extends StatelessWidget {
                       margin: EdgeInsets.only(
                           left: spacer.inputRightSpace != null ? spacer.inputRightSpace! / 2 : 8,
                           right: spacer.rightSpace ?? 16,
-                          top: additionInfo != '' ? getInputPadding() : 0),
+                          top: additionInfo != '' ? getInputPadding(context) : 0),
                       child: Icon(
                         size: clearIconSize,
                         TDIcons.close_circle_filled,
@@ -438,7 +444,7 @@ class TDInput extends StatelessWidget {
                       margin: EdgeInsets.only(
                           left: spacer.inputRightSpace != null ? spacer.inputRightSpace! / 2 : 8,
                           right: spacer.rightSpace ?? 16,
-                          top: additionInfo != '' ? getInputPadding() : 0),
+                          top: additionInfo != '' ? getInputPadding(context) : 0),
                       child: rightBtn,
                     ),
                   ),
@@ -491,139 +497,184 @@ class TDInput extends StatelessWidget {
   }
 
   Widget buildTwoLineInput(BuildContext context) {
-    return Container(
-      alignment: Alignment.centerLeft,
-      color: decoration != null ? null : backgroundColor,
-      decoration: decoration,
-      child: Stack(
-        alignment: Alignment.bottomCenter,
-        children: [
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Visibility(
-                  visible: leftLabel != null,
-                  child: Row(
-                    children: [
-                      Visibility(
-                        visible: leftLabel != null,
-                        child: Container(
-                          constraints: BoxConstraints(maxWidth: _leftLabelWidth + (leftLabelSpace ?? 12)),
-                          padding: EdgeInsets.only(left: leftLabelSpace ?? 12.0, top: 10.0),
-                          child: Column(
-                            children: [
-                              TDText(
-                                leftLabel,
-                                maxLines: 2,
-                                style: leftLabelStyle ?? const TextStyle(letterSpacing: 0),
+    return GestureDetector(
+      onTap: (){
+        print('tap');
+        focusNode?.requestFocus();
+      },
+      child: Container(
+        alignment: Alignment.centerLeft,
+        color: decoration != null ? null : backgroundColor,
+        decoration: decoration,
+        child: Stack(
+          alignment: Alignment.bottomCenter,
+          children: [
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Visibility(
+                    visible: leftLabel != null,
+                    child: Row(
+                      children: [
+                        Visibility(
+                          visible: leftLabel != null,
+                          child: Container(
+                            constraints: BoxConstraints(maxWidth: _leftLabelWidth + (leftLabelSpace ?? 12)),
+                            padding: EdgeInsets.only(left: leftLabelSpace ?? 16.0, top: 10.0),
+                            child: Column(
+                              children: [
+                                TDText(
+                                  leftLabel,
+                                  maxLines: 2,
+                                  style: leftLabelStyle ?? const TextStyle(letterSpacing: 0),
+                                  font: TDTheme.of(context).fontBodyLarge,
+                                  fontWeight: FontWeight.w400,
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                        Visibility(
+                          visible: labelWidget != null,
+                          child: labelWidget ?? const SizedBox.shrink(),
+                        ),
+                        Visibility(
+                            visible: required ?? false,
+                            child: Padding(
+                              padding: const EdgeInsets.only(left: 1.0),
+                              child: TDText(
+                                '*',
+                                maxLines: 1,
+                                style: TextStyle(color: TDTheme.of(context).errorColor6),
                                 font: TDTheme.of(context).fontBodyLarge,
                                 fontWeight: FontWeight.w400,
                               ),
-                            ],
-                          ),
-                        ),
-                      ),
+                            )),
+                      ],
+                    )),
+                Container(
+                  padding: EdgeInsets.only(
+                      bottom:
+                      additionInfo!='' ? TDTheme.of(context).spacer4:
+                      errorText != null ? TDTheme.of(context).spacer4
+                          : TDTheme.of(context).spacer8,
+                      top: 0
+                  ),
+                  alignment: Alignment.center,
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: <Widget>[
                       Visibility(
                         visible: labelWidget != null,
                         child: labelWidget ?? const SizedBox.shrink(),
                       ),
-                      Visibility(
-                          visible: required ?? false,
-                          child: Padding(
-                            padding: const EdgeInsets.only(left: 1.0),
-                            child: TDText(
-                              '*',
-                              maxLines: 1,
-                              style: TextStyle(color: TDTheme.of(context).errorColor6),
-                              font: TDTheme.of(context).fontBodyLarge,
-                              fontWeight: FontWeight.w400,
-                            ),
-                          )),
-                    ],
-                  )),
-              Container(
-                padding: const EdgeInsets.only(bottom: 12, top: 7),
-                alignment: Alignment.center,
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: <Widget>[
-                    Visibility(
-                      visible: labelWidget != null,
-                      child: labelWidget ?? const SizedBox.shrink(),
-                    ),
-                    Expanded(
-                      flex: 1,
-                      child: TDInputView(
-                        textStyle: textStyle ?? TextStyle(color: TDTheme.of(context).fontGyColor1),
-                        readOnly: readOnly,
-                        autofocus: autofocus,
-                        obscureText: obscureText,
-                        onEditingComplete: onEditingComplete,
-                        onSubmitted: onSubmitted,
-                        hintText: hintText,
-                        inputType: inputType,
-                        onChanged: onChanged,
-                        textAlign: textAlign,
-                        inputFormatters: inputFormatters,
-                        inputDecoration: inputDecoration,
-                        isCollapsed: true,
-                        maxLines: maxLines,
-                        focusNode: focusNode,
-                        hintTextStyle: hintTextStyle ?? TextStyle(color: TDTheme.of(context).fontGyColor3),
-                        cursorColor: cursorColor,
-                        textInputBackgroundColor: textInputBackgroundColor,
-                        controller: controller,
-                        contentPadding: contentPadding ??
-                            EdgeInsets.only(
-                                left: spacer.labelInputSpace ?? 16,
-                                right: spacer.inputRightSpace != null ? spacer.inputRightSpace! / 2 : 8,
-                            ),
-                        inputAction: inputAction,
-                      ),
-                    ),
-                    Visibility(
-                      visible: controller != null && controller!.text.isNotEmpty && needClear,
-                      child: GestureDetector(
-                        child: Container(
-                          margin: EdgeInsets.only(
-                              left: spacer.inputRightSpace != null ? spacer.inputRightSpace! / 2 : 8,
-                              right: spacer.rightSpace ?? 16,
-                          ),
-                          child: Icon(
-                            size: clearIconSize,
-                            TDIcons.close_circle_filled,
-                            color: clearBtnColor ?? TDTheme.of(context).fontGyColor3,
-                          ),
+                      Expanded(
+                        flex: 1,
+                        child: TDInputView(
+                          textStyle: textStyle ?? TextStyle(color: TDTheme.of(context).fontGyColor1),
+                          readOnly: readOnly,
+                          autofocus: autofocus,
+                          obscureText: obscureText,
+                          onEditingComplete: onEditingComplete,
+                          onSubmitted: onSubmitted,
+                          hintText: hintText,
+                          inputType: inputType,
+                          onChanged: onChanged,
+                          textAlign: textAlign,
+                          inputFormatters: inputFormatters,
+                          inputDecoration: inputDecoration,
+                          isCollapsed: true,
+                          maxLines: maxLines,
+                          focusNode: focusNode,
+                          hintTextStyle: hintTextStyle ?? TextStyle(color: TDTheme.of(context).fontGyColor3),
+                          cursorColor: cursorColor,
+                          textInputBackgroundColor: textInputBackgroundColor,
+                          controller: controller,
+                          contentPadding: contentPadding ??
+                              EdgeInsets.only(
+                                  left: spacer.labelInputSpace ?? 16,
+                                  right: spacer.inputRightSpace != null ? spacer.inputRightSpace! / 2 : 8,
+                              ),
+                          inputAction: inputAction,
                         ),
-                        onTap: onClearTap,
                       ),
-                      replacement: Visibility(
-                        visible: rightBtn != null,
+                      Visibility(
+                        visible: controller != null && controller!.text.isNotEmpty && needClear,
                         child: GestureDetector(
-                          onTap: onBtnTap,
                           child: Container(
                             margin: EdgeInsets.only(
                                 left: spacer.inputRightSpace != null ? spacer.inputRightSpace! / 2 : 8,
                                 right: spacer.rightSpace ?? 16,
                             ),
-                            child: rightBtn,
+                            child: Icon(
+                              size: clearIconSize,
+                              TDIcons.close_circle_filled,
+                              color: clearBtnColor ?? TDTheme.of(context).fontGyColor3,
+                            ),
+                          ),
+                          onTap: onClearTap,
+                        ),
+                        replacement: Visibility(
+                          visible: rightBtn != null,
+                          child: GestureDetector(
+                            onTap: onBtnTap,
+                            child: Container(
+                              margin: EdgeInsets.only(
+                                  left: spacer.inputRightSpace != null ? spacer.inputRightSpace! / 2 : 8,
+                                  right: spacer.rightSpace ?? 16,
+                              ),
+                              child: rightBtn,
+                            ),
                           ),
                         ),
                       ),
+                    ],
+                  ),
+                ),
+                Visibility(
+                    visible: errorText != null,
+                    child: Container(
+                      width: double.infinity,
+                      padding: EdgeInsets.only(
+                        left: TDTheme.of(context).spacer16,
+                        right: TDTheme.of(context).spacer16,
+                        bottom: TDTheme.of(context).spacer8
+                      ),
+                      child: TDText(
+                        errorText,
+                        font: TDTheme.of(context).fontBodySmall,
+                        textColor: TDTheme.of(context).errorColor6,
+                      ),
+                    )
+                ),
+                Visibility(
+                  child: Container(
+                    width: double.infinity,
+                    padding: EdgeInsets.only(
+                        left: spacer.additionInfoSpace ?? 16,
+                        right:TextAlign.end==contentAlignment?8:0,
+                        bottom: getInputPadding(context)
                     ),
-                  ],
+                    child: TDText(
+                      additionInfo,
+                      font: TDTheme.of(context).fontBodySmall,
+                      textAlign: contentAlignment!=TextAlign.center?contentAlignment:TextAlign.start,
+                      textColor: additionInfoColor ?? TDTheme.of(context).fontGyColor3,
+                    ),
+                  ),
+                  visible: additionInfo != '',
+                )
+              ],
+            ),
+            if (showBottomDivider)
+              TDDivider(
+                margin: EdgeInsets.only(
+                  left: _getBottomDividerMarginLeft(),
                 ),
               ),
-            ],
-          ),
-          if (showBottomDivider)
-            TDDivider(
-              margin: EdgeInsets.only(
-                left: _getBottomDividerMarginLeft(),
-              ),
-            ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -643,7 +694,7 @@ class TDInput extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Padding(
-                    padding: EdgeInsets.only(left: 16, top: getInputPadding(), bottom: getInputPadding()),
+                    padding: EdgeInsets.only(left: 16, top: getInputPadding(context), bottom: getInputPadding(context)),
                     child: TDText(
                       leftLabel,
                       maxLines: 2,
@@ -712,7 +763,7 @@ class TDInput extends StatelessWidget {
                 visible: leftLabel != null,
                 child: Padding(
                   padding:
-                      EdgeInsets.only(left: leftLabelSpace ?? 16, top: getInputPadding(), bottom: getInputPadding()),
+                      EdgeInsets.only(left: leftLabelSpace ?? 16, top: getInputPadding(context), bottom: getInputPadding(context)),
                   child: leftInfoWidth != null
                       ? SizedBox(
                           width: _leftLabelWidth,
@@ -761,7 +812,7 @@ class TDInput extends StatelessWidget {
                     textAlign: textAlign,
                     contentPadding: contentPadding ??
                         EdgeInsets.only(
-                            right: spacer.inputRightSpace!, bottom: getInputPadding(), top: getInputPadding()),
+                            right: spacer.inputRightSpace!, bottom: getInputPadding(context), top: getInputPadding(context)),
                     inputAction: inputAction,
                   ),
                 ),
@@ -769,7 +820,7 @@ class TDInput extends StatelessWidget {
               Visibility(
                 visible: rightWidget != null,
                 child: Container(
-                  margin: EdgeInsets.only(top: getInputPadding(), bottom: getInputPadding(), right: spacer.rightSpace!),
+                  margin: EdgeInsets.only(top: getInputPadding(context), bottom: getInputPadding(context), right: spacer.rightSpace!),
                   child: rightWidget,
                 ),
               ),

@@ -3,13 +3,13 @@ import 'package:flutter/material.dart';
 import '../../../tdesign_flutter.dart';
 import 'td_cell_inherited.dart';
 
-typedef CellBuilder = Widget Function(BuildContext context, TDCell cell, int index);
+typedef CellBuilder<T> = Widget Function(BuildContext context, T cell, int index);
 
 enum TDCellGroupTheme { defaultTheme, cardTheme }
 
 /// 单元格组组件
-class TDCellGroup extends StatefulWidget {
-  const TDCellGroup({
+class TDCellGroup<T> extends StatefulWidget {
+  const TDCellGroup ({
     Key? key,
     this.bordered = false,
     this.theme = TDCellGroupTheme.defaultTheme,
@@ -35,10 +35,10 @@ class TDCellGroup extends StatefulWidget {
   final Widget? titleWidget;
 
   /// 单元格列表
-  final List<TDCell> cells;
+  final List<T> cells;
 
   /// cell构建器，可自定义cell父组件，如Dismissible
-  final CellBuilder? builder;
+  final CellBuilder<T>? builder;
 
   /// 自定义样式
   final TDCellStyle? style;
@@ -50,10 +50,10 @@ class TDCellGroup extends StatefulWidget {
   final bool? isShowLastBordered;
 
   @override
-  _TDCellGroupState createState() => _TDCellGroupState();
+  _TDCellGroupState<T> createState() => _TDCellGroupState<T>();
 }
 
-class _TDCellGroupState extends State<TDCellGroup> {
+class _TDCellGroupState<T> extends State<TDCellGroup<T>> {
   @override
   Widget build(BuildContext context) {
     var style = widget.style ?? TDCellStyle.cellStyle(context);
@@ -87,14 +87,16 @@ class _TDCellGroupState extends State<TDCellGroup> {
                   itemCount: itemCount,
                   itemBuilder: (context, index) {
                     final item = widget.cells[index];
-                    final cell = widget.builder == null ? item : widget.builder!(context, item, index);
+                    final builder = widget.builder;
+                    final cell = builder == null ? item as Widget : builder(context, item, index);
                     if (itemCount - 1 == index && (widget.isShowLastBordered ?? false)) {
                       return Column(children: [cell, _borderWidget(style)]);
                     }
                     return cell;
                   },
                   separatorBuilder: (context, index) {
-                    if (!(widget.cells[index].bordered ?? true)) {
+                    final cell = widget.cells[index];
+                    if (cell is TDCell && !(cell.bordered ?? true)) {
                       return const SizedBox.shrink();
                     }
                     return _borderWidget(style);
