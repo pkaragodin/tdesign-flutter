@@ -500,10 +500,14 @@ class TDInput extends StatelessWidget {
   }
 
   Widget buildTwoLineInput(BuildContext context) {
-    return GestureDetector(
-      onTap: (){
+    return TapRegion(
+      onTapInside: (tap){
         focusNode?.requestFocus();
         onTap?.call();
+      },
+      onTapOutside: (tap) {
+        focusNode?.unfocus();
+        onTapOutside?.call(tap);
       },
       child: Container(
         alignment: Alignment.centerLeft,
