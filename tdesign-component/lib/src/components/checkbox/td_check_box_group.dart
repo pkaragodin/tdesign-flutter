@@ -191,7 +191,6 @@ class TDCheckboxGroupState extends State<TDCheckboxGroup> {
   ///
   ///
   bool getCheckBoxStateById(String id, bool checked) {
-    print('checkbox states ${checkBoxStates} ${id} ${checked}');
     if (checkBoxStates[id] == null) {
       // replace check to false, because when using with TDRadioGroup has bug with inconsistent state
       // checkBox本身的状态

@@ -244,7 +244,7 @@ class _TDButtonState extends State<TDButton> {
       children.insert(
         1,
         SizedBox(
-          width:widget.iconTextSpacing??8,
+          width:widget.iconTextSpacing?? TDTheme.of(context).spacer4,
         ),
       );
     }

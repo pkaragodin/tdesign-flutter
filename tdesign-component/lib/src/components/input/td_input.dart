@@ -62,7 +62,8 @@ class TDInput extends StatelessWidget {
       TDInputSpacer? spacer,
       this.cardStyleBottomText,
       this.onTapOutside,
-      this.errorText
+      this.errorText,
+      this.onTap
       })
       :
         // assert(() {
@@ -246,6 +247,8 @@ class TDInput extends StatelessWidget {
   final TapRegionCallback? onTapOutside;
 
   final String? errorText;
+
+  final Function? onTap;
 
   /// 获取输入框规格
   double getInputPadding(BuildContext context) {
@@ -499,8 +502,8 @@ class TDInput extends StatelessWidget {
   Widget buildTwoLineInput(BuildContext context) {
     return GestureDetector(
       onTap: (){
-        print('tap');
         focusNode?.requestFocus();
+        onTap?.call();
       },
       child: Container(
         alignment: Alignment.centerLeft,
